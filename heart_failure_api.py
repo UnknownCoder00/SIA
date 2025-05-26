@@ -55,4 +55,4 @@ def predict_heart_failure():
 
 
 if __name__ == '__main__':
-    api.run(port=8000)
+    api.run(port=5000, host='0.0.0.0')
