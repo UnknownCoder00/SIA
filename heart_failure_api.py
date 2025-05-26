@@ -55,4 +55,4 @@ def predict_heart_failure():
 
 
 if __name__ == '__main__':
-    api.run(debug=true, host='0.0.0.0')
+    api.run(debug=True, host='0.0.0.0')
