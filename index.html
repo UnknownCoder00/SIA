@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wine Quality Predictor</title>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      background-color: #f9f6f1;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #7b2d26;
+      color: #fff;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    header span {
+      font-size: 1.2rem;
+      display: block;
+      margin-top: 0.3rem;
+    }
+
+    form {
+      max-width: 600px;
+      margin: 2rem auto;
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: 'Georgia', serif;
+    }
+
+    button {
+      margin-top: 2rem;
+      padding: 0.75rem;
+      width: 100%;
+      background-color: #7b2d26;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #5c211d;
+    }
+
+    #result {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: bold;
+      padding: 1rem;
+      border-radius: 10px;
+    }
+
+    .good {
+      color: #b87333;
+    }
+
+    .very-good {
+      color: #c0a000;
+    }
+
+    .excellent {
+      color: #3c763d;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 2rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🍷 Wine Quality Predictor</h1>
+    <span>Estimate the quality of your wine based on chemical properties</span>
+  </header>
+
+  <form id="wineForm">
+    <label>Fixed Acidity</label>
+    <input type="number" step="0.01" name="fixed_acidity" required>
+
+    <label>Volatile Acidity</label>
+    <input type="number" step="0.01" name="volatile_acidity" required>
+
+    <label>Citric Acid</label>
+    <input type="number" step="0.01" name="citric_acid" required>
+
+    <label>Residual Sugar</label>
+    <input type="number" step="0.01" name="residual_sugar" required>
+
+    <label>Chlorides</label>
+    <input type="number" step="0.001" name="chlorides" required>
+
+    <label>Free Sulfur Dioxide</label>
+    <input type="number" name="free_sulfur_dioxide" required>
+
+    <label>Total Sulfur Dioxide</label>
+    <input type="number" name="total_sulfur_dioxide" required>
+
+    <label>Density</label>
+    <input type="number" step="0.0001" name="density" required>
+
+    <label>pH</label>
+    <input type="number" step="0.01" name="pH" required>
+
+    <label>Sulphates</label>
+    <input type="number" step="0.01" name="sulphates" required>
+
+    <label>Alcohol</label>
+    <input type="number" step="0.1" name="alcohol" required>
+
+    <button type="submit">Predict Quality</button>
+  </form>
+
+  <div id="result"></div>
+
+  <footer>
+    &copy; 2025 Wine Insights. All rights reserved.
+  </footer>
+
+  <script>
+    document.getElementById('wineForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const jsonData = {};
+      formData.forEach((value, key) => {
+        jsonData[key] = parseFloat(value);
+      });
+
+      try {
+        const response = await fetch('http://localhost:8000/predict/hfp_prediction', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(jsonData)
+        });
+
+        if (!response.ok) throw new Error('Network response was not OK');
+
+        const result = await response.json();
+        const quality = result.prediction;
+
+        let label = '', cssClass = '';
+        if ([3, 4].includes(quality)) {
+          label = 'Good';
+          cssClass = 'good';
+        } else if ([5, 6].includes(quality)) {
+          label = 'Very Good';
+          cssClass = 'very-good';
+        } else if ([7, 8].includes(quality)) {
+          label = 'Excellent';
+          cssClass = 'excellent';
+        } else {
+          label = 'Unknown Quality';
+        }
+
+        const resultDiv = document.getElementById('result');
+        resultDiv.className = cssClass;
+        resultDiv.innerText = `Predicted Quality: ${quality} (${label})`;
+      } catch (error) {
+        document.getElementById('result').innerText = 'Error: ' + error.message;
+      }
+    });
+  </script>
+
+</body>
+</html>
